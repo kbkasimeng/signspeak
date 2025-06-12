@@ -26,9 +26,9 @@ export const Navigation: React.FC = () => {
           {/* Navigation Links */}
           <div className="hidden md:flex items-center space-x-6">
             <Link
-              to="/"
+              to="/app"
               className={`px-3 py-2 rounded-lg transition-colors duration-200 ${
-                isActive('/') 
+                isActive('/app') 
                   ? 'bg-blue-100 text-blue-700' 
                   : 'text-gray-600 hover:text-gray-800 hover:bg-gray-100'
               }`}
