@@ -6,7 +6,7 @@ export const SignupPage: React.FC = () => {
   const navigate = useNavigate();
 
   const handleSignupSuccess = () => {
-    navigate('/');
+    navigate('/app');
   };
 
   return (

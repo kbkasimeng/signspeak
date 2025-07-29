@@ -1,11 +1,12 @@
 import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Hand, Waves, User, LogOut, Shield, FileText } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 
 export const Navigation: React.FC = () => {
   const { user, logout } = useAuth();
   const location = useLocation();
+  const navigate = useNavigate();
 
   const isActive = (path: string) => location.pathname === path;
 
@@ -24,38 +25,40 @@ export const Navigation: React.FC = () => {
           </Link>
 
           {/* Navigation Links */}
-          <div className="hidden md:flex items-center space-x-6">
-            <Link
-              to="/app"
-              className={`px-3 py-2 rounded-lg transition-colors duration-200 ${
-                isActive('/app') 
-                  ? 'bg-blue-100 text-blue-700' 
-                  : 'text-gray-600 hover:text-gray-800 hover:bg-gray-100'
-              }`}
-            >
-              Converter
-            </Link>
-            <Link
-              to="/privacy"
-              className={`px-3 py-2 rounded-lg transition-colors duration-200 ${
-                isActive('/privacy') 
-                  ? 'bg-blue-100 text-blue-700' 
-                  : 'text-gray-600 hover:text-gray-800 hover:bg-gray-100'
-              }`}
-            >
-              Privacy
-            </Link>
-            <Link
-              to="/security"
-              className={`px-3 py-2 rounded-lg transition-colors duration-200 ${
-                isActive('/security') 
-                  ? 'bg-blue-100 text-blue-700' 
-                  : 'text-gray-600 hover:text-gray-800 hover:bg-gray-100'
-              }`}
-            >
-              Security
-            </Link>
-          </div>
+          {!['/', '/login', '/signup'].includes(location.pathname) && (
+            <div className="hidden md:flex items-center space-x-6">
+              <Link
+                to="/app"
+                className={`px-3 py-2 rounded-lg transition-colors duration-200 ${
+                  isActive('/app') 
+                    ? 'bg-blue-100 text-blue-700' 
+                    : 'text-gray-600 hover:text-gray-800 hover:bg-gray-100'
+                }`}
+              >
+                Converter
+              </Link>
+              <Link
+                to="/privacy"
+                className={`px-3 py-2 rounded-lg transition-colors duration-200 ${
+                  isActive('/privacy') 
+                    ? 'bg-blue-100 text-blue-700' 
+                    : 'text-gray-600 hover:text-gray-800 hover:bg-gray-100'
+                }`}
+              >
+                Privacy
+              </Link>
+              <Link
+                to="/security"
+                className={`px-3 py-2 rounded-lg transition-colors duration-200 ${
+                  isActive('/security') 
+                    ? 'bg-blue-100 text-blue-700' 
+                    : 'text-gray-600 hover:text-gray-800 hover:bg-gray-100'
+                }`}
+              >
+                Security
+              </Link>
+            </div>
+          )}
 
           {/* User Menu */}
           <div className="flex items-center space-x-4">
@@ -70,7 +73,10 @@ export const Navigation: React.FC = () => {
                   </span>
                 </div>
                 <button
-                  onClick={logout}
+                  onClick={() => {
+                    logout();
+                    navigate('/');
+                  }}
                   className="flex items-center space-x-1 px-3 py-2 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors duration-200"
                 >
                   <LogOut className="w-4 h-4" />

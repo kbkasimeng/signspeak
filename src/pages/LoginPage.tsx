@@ -6,7 +6,7 @@ export const LoginPage: React.FC = () => {
   const navigate = useNavigate();
 
   const handleLoginSuccess = () => {
-    navigate('/');
+    navigate('/app');
   };
 
   return (
