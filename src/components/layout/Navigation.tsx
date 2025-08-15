@@ -9,20 +9,21 @@ export const Navigation: React.FC = () => {
   const navigate = useNavigate();
 
   const isActive = (path: string) => location.pathname === path;
+  const isLandingPage = location.pathname === '/';
 
   return (
     <nav className="bg-white/80 backdrop-blur-sm border-b border-white/20 sticky top-0 z-50">
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <Link to="/" className="flex items-center space-x-2">
+          <div className="flex items-center space-x-2">
             <div className="p-2 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg">
               <Hand className="w-6 h-6 text-white" />
             </div>
             <span className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
               SignSpeak
             </span>
-          </Link>
+          </div>
 
           {/* Navigation Links */}
           {!['/', '/login', '/signup'].includes(location.pathname) && (
@@ -62,7 +63,7 @@ export const Navigation: React.FC = () => {
 
           {/* User Menu */}
           <div className="flex items-center space-x-4">
-            {user ? (
+            {user && !isLandingPage ? (
               <div className="flex items-center space-x-3">
                 <div className="flex items-center space-x-2">
                   <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
@@ -74,8 +75,37 @@ export const Navigation: React.FC = () => {
                 </div>
                 <button
                   onClick={() => {
-                    logout();
-                    navigate('/');
+                    const confirmed = window.confirm('Are you sure you want to logout?');
+                    if (confirmed) {
+                      // Save current word history with logout timestamp before logging out
+                      if (user) {
+                        // Get the current word history from the HomePage state
+                        // We need to trigger a save of the current session data
+                        const currentHistory = localStorage.getItem(`signspeak_history_${user.id}`);
+                        if (currentHistory) {
+                          try {
+                            const historyData = JSON.parse(currentHistory);
+                            // Update the history with logout timestamp
+                            const updatedHistoryData = {
+                              ...historyData,
+                              savedAt: new Date().toISOString(),
+                              logoutAt: new Date().toISOString(),
+                              lastSessionUserId: user.id,
+                              lastSessionUserEmail: user.email
+                            };
+                            localStorage.setItem(`signspeak_history_${user.id}`, JSON.stringify(updatedHistoryData));
+                            
+                            // Also save to a general history key for the user's email
+                            localStorage.setItem(`signspeak_history_email_${user.email}`, JSON.stringify(updatedHistoryData));
+                          } catch (error) {
+                            console.error('Error saving word history on logout:', error);
+                          }
+                        }
+                      }
+                      
+                      logout();
+                      navigate('/');
+                    }
                   }}
                   className="flex items-center space-x-1 px-3 py-2 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors duration-200"
                 >

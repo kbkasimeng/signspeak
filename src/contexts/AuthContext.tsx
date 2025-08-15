@@ -7,12 +7,23 @@ interface User {
   createdAt: string;
 }
 
+interface WordHistoryItem {
+  word: string;
+  timestamp: string;
+  type: 'voice' | 'text';
+  userId?: string;
+  userName?: string;
+}
+
 interface AuthContextType {
   user: User | null;
   login: (email: string, password: string) => Promise<boolean>;
   signup: (email: string, password: string, name: string) => Promise<boolean>;
   logout: () => void;
   isLoading: boolean;
+  saveWordHistory: (words: WordHistoryItem[]) => void;
+  getWordHistory: () => WordHistoryItem[];
+  getLastLogoutDate: () => string | null;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -61,6 +72,26 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         createdAt: new Date().toISOString()
       };
       
+      // Check if there's existing history data for this email
+      const existingHistory = localStorage.getItem(`signspeak_history_email_${email}`);
+      if (existingHistory) {
+        try {
+          const historyData = JSON.parse(existingHistory);
+          // Migrate the history to the new user ID
+          const migratedHistoryData = {
+            ...historyData,
+            userId: mockUser.id,
+            userName: mockUser.name,
+            userEmail: mockUser.email,
+            migratedAt: new Date().toISOString()
+          };
+          localStorage.setItem(`signspeak_history_${mockUser.id}`, JSON.stringify(migratedHistoryData));
+          localStorage.setItem(`signspeak_history_email_${email}`, JSON.stringify(migratedHistoryData));
+        } catch (error) {
+          console.error('Error migrating word history:', error);
+        }
+      }
+      
       setUser(mockUser);
       localStorage.setItem('signspeak_user', JSON.stringify(mockUser));
       setIsLoading(false);
@@ -86,6 +117,26 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         createdAt: new Date().toISOString()
       };
       
+      // Check if there's existing history data for this email
+      const existingHistory = localStorage.getItem(`signspeak_history_email_${email}`);
+      if (existingHistory) {
+        try {
+          const historyData = JSON.parse(existingHistory);
+          // Migrate the history to the new user ID
+          const migratedHistoryData = {
+            ...historyData,
+            userId: mockUser.id,
+            userName: mockUser.name,
+            userEmail: mockUser.email,
+            migratedAt: new Date().toISOString()
+          };
+          localStorage.setItem(`signspeak_history_${mockUser.id}`, JSON.stringify(migratedHistoryData));
+          localStorage.setItem(`signspeak_history_email_${email}`, JSON.stringify(migratedHistoryData));
+        } catch (error) {
+          console.error('Error migrating word history:', error);
+        }
+      }
+      
       setUser(mockUser);
       localStorage.setItem('signspeak_user', JSON.stringify(mockUser));
       setIsLoading(false);
@@ -96,7 +147,79 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     return false;
   };
 
+  const saveWordHistory = (words: WordHistoryItem[]) => {
+    if (user) {
+      const historyData = {
+        userId: user.id,
+        userName: user.name,
+        userEmail: user.email,
+        words: words,
+        savedAt: new Date().toISOString()
+      };
+      // Save by user ID
+      localStorage.setItem(`signspeak_history_${user.id}`, JSON.stringify(historyData));
+      // Also save by email for persistence across sessions
+      localStorage.setItem(`signspeak_history_email_${user.email}`, JSON.stringify(historyData));
+    }
+  };
+
+  const getWordHistory = (): WordHistoryItem[] => {
+    if (user) {
+      // First try to get history by current user ID
+      let savedHistory = localStorage.getItem(`signspeak_history_${user.id}`);
+      
+      // If no history found by ID, try to find by email (for returning users)
+      if (!savedHistory) {
+        savedHistory = localStorage.getItem(`signspeak_history_email_${user.email}`);
+      }
+      
+      if (savedHistory) {
+        try {
+          const historyData = JSON.parse(savedHistory);
+          return historyData.words || [];
+        } catch (error) {
+          console.error('Error parsing word history:', error);
+        }
+      }
+    }
+    return [];
+  };
+
+  const getLastLogoutDate = (): string | null => {
+    if (user) {
+      // First try to get history by current user ID
+      let savedHistory = localStorage.getItem(`signspeak_history_${user.id}`);
+      
+      // If no history found by ID, try to find by email (for returning users)
+      if (!savedHistory) {
+        savedHistory = localStorage.getItem(`signspeak_history_email_${user.email}`);
+      }
+      
+      if (savedHistory) {
+        try {
+          const historyData = JSON.parse(savedHistory);
+          // Return logoutAt if available, otherwise fall back to savedAt
+          return historyData.logoutAt || historyData.savedAt || null;
+        } catch (error) {
+          console.error('Error parsing word history:', error);
+        }
+      }
+    }
+    return null;
+  };
+
   const logout = () => {
+    // Save current word history before logging out
+    if (user) {
+      // Get current word history from HomePage state (this will be passed from the component)
+      // For now, we'll save an empty array as the current implementation doesn't have access to it
+      // This will be handled in the HomePage component
+      const currentHistory = getWordHistory();
+      if (currentHistory.length > 0) {
+        saveWordHistory(currentHistory);
+      }
+    }
+    
     setUser(null);
     localStorage.removeItem('signspeak_user');
   };
@@ -106,7 +229,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     login,
     signup,
     logout,
-    isLoading
+    isLoading,
+    saveWordHistory,
+    getWordHistory,
+    getLastLogoutDate
   };
 
   return (

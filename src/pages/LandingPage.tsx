@@ -419,7 +419,6 @@ export const LandingPage: React.FC = () => {
             <div>
               <h4 className="text-lg font-semibold mb-4">Quick Links</h4>
               <ul className="space-y-2 text-gray-400">
-                <li><Link to="/" className="hover:text-white transition-colors">Converter</Link></li>
                 <li><Link to="/signup" className="hover:text-white transition-colors">Sign Up</Link></li>
                 <li><Link to="/login" className="hover:text-white transition-colors">Login</Link></li>
                 <li><a href="#features" className="hover:text-white transition-colors">Features</a></li>
@@ -430,8 +429,6 @@ export const LandingPage: React.FC = () => {
             <div>
               <h4 className="text-lg font-semibold mb-4">Legal</h4>
               <ul className="space-y-2 text-gray-400">
-                <li><Link to="/privacy" className="hover:text-white transition-colors">Privacy Policy</Link></li>
-                <li><Link to="/security" className="hover:text-white transition-colors">Security</Link></li>
                 <li><a href="#terms" className="hover:text-white transition-colors">Terms of Service</a></li>
                 <li><a href="#contact" className="hover:text-white transition-colors">Contact</a></li>
               </ul>

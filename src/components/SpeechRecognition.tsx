@@ -23,7 +23,7 @@ export const SpeechRecognition: React.FC<SpeechRecognitionProps> = ({
     if (SpeechRecognition) {
       setIsSupported(true);
       const recognition = new SpeechRecognition();
-      recognition.continuous = true;
+      recognition.continuous = false; // Set to false to get complete sentences
       recognition.interimResults = true;
       recognition.lang = 'en-US';
 
@@ -41,9 +41,20 @@ export const SpeechRecognition: React.FC<SpeechRecognitionProps> = ({
         }
 
         if (finalTranscript) {
-          onTranscript(finalTranscript.trim());
+          // Clean up the transcript and send the complete sentence
+          const cleanTranscript = finalTranscript.trim();
+          if (cleanTranscript) {
+            onTranscript(cleanTranscript);
+          }
         }
         setInterimTranscript(interim);
+      };
+
+      recognition.onend = () => {
+        // Restart recognition if it's still supposed to be active
+        if (isActive) {
+          recognition.start();
+        }
       };
 
       recognition.onerror = (event: any) => {

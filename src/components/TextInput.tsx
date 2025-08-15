@@ -30,7 +30,7 @@ export const TextInput: React.FC<TextInputProps> = ({ onSubmit }) => {
             value={text}
             onChange={(e) => setText(e.target.value)}
             placeholder="Type a word to see its sign..."
-            className="w-full px-4 py-2 border border-gray-300 rounded-l-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 placeholder:text-xs"
+            className="w-full px-4 py-2 border border-gray-300 rounded-l-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
           />
           <button
             type="submit"
